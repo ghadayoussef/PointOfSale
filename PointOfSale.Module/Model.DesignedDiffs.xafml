@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="PointOfSale">
+  <NavigationItems>
+    <Items>
+      <Item Id="@23480764-b2e1-4f9c-9709-bcfefcd48d84" Caption="Purchasing" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="PurchaseOrder_ListView" ViewId="PurchaseOrder_ListView" ObjectKey="" IsNewNode="True" />
+          <Item Id="Supplier_ListView" ViewId="Supplier_ListView" ObjectKey="" IsNewNode="True" />
+        </Items>
+      </Item>
+      <Item Id="Default">
+        <Items>
+          <Item Id="PurchaseOrder_ListView" Removed="True" />
+          <Item Id="Supplier_ListView" Removed="True" />
+        </Items>
+      </Item>
+      <Item Id="Items Catalog">
+        <Items>
+          <Item Id="Item_ListView" ImageName="BO_Product_32x32" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="19.1.4.0" IsNewNode="True" />
+  </SchemaModules>
+  <Views>
+    <ListView Id="PurchaseOrder_PoProducts_ListView">
+      <Columns>
+        <ColumnInfo Id="ItemID" Index="-1" />
+        <ColumnInfo Id="PurchaseOrderID" Index="-1" />
+        <ColumnInfo Id="Returned" Index="-1" />
+        <ColumnInfo Id="Item" Width="260" />
+        <ColumnInfo Id="Quantity" Index="1" Width="83" />
+        <ColumnInfo Id="UnitPrice" Index="2" Width="213" />
+      </Columns>
+    </ListView>
+  </Views>
+</Application>
