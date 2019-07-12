@@ -15,6 +15,7 @@ using DevExpress.Persistent.Validation;
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    //[DefaultProperty("Name")]
     //[ImageName("BO_Contact")]
     //[DefaultProperty("DisplayMemberNameForLookupEditorsOfThisType")]
     //[DefaultListViewOptions(MasterDetailMode.ListViewOnly, false, NewItemRowPosition.None)]

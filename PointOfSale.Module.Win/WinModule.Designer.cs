@@ -28,6 +28,8 @@
             // 
             this.RequiredModuleTypes.Add(typeof(PointOfSale.Module.PointOfSaleModule));
             this.RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Win.SystemModule.SystemWindowsFormsModule));
+            this.RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Validation.Win.ValidationWindowsFormsModule));
+
         }
 
         #endregion

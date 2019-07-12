@@ -15,19 +15,17 @@ using DevExpress.Persistent.Validation;
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    //[ImageName("BO_Contact")]
-    //[DefaultProperty("DisplayMemberNameForLookupEditorsOfThisType")]
-    //[DefaultListViewOptions(MasterDetailMode.ListViewOnly, false, NewItemRowPosition.None)]
-    //[Persistent("DatabaseTableName")]
-    // Specify more UI options using a declarative approach (https://documentation.devexpress.com/#eXpressAppFramework/CustomDocument112701).
     public class PoProduct : BaseObject
-    { // Inherit from a different class to provide a custom primary key, concurrency and deletion behavior, etc. (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument113146.aspx).
+    { 
         public PoProduct(Session session)
             : base(session)
         {
         }
 
         private Item _item;
+        [RuleRequiredField]
+
+        [ImmediatePostData]
         [Association("item-PoProducts")]
         public Item Item
         {
@@ -38,8 +36,15 @@ namespace PointOfSale.Module.BusinessObjects
             set
             {
                 SetPropertyValue("Item", ref _item, value);
+                if(_item != null)
+                {
+                    UnitPrice = (float)_item.DefaultBuyingPrice;
+                }
             }
         }
+
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public int ItemID
         {
             get
@@ -52,6 +57,8 @@ namespace PointOfSale.Module.BusinessObjects
         }
 
         private PurchaseOrder _purchaseOrder;
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         [Association("PurchaseOrder-PoProducts")]
         public PurchaseOrder PurchaseOrder
         {
@@ -75,40 +82,66 @@ namespace PointOfSale.Module.BusinessObjects
                     return 0;
             }
         }
+
+        private int _quantity;
+        [ImmediatePostData]
+        [RuleRequiredField]
         public int Quantity
         {
-            get;
-            set;
+            get
+            {
+                return _quantity;
+            }
+            set
+            {
+                SetPropertyValue("Quantity", ref _quantity, value);
+            }
         }
+
+        [ImmediatePostData]
         public float UnitPrice
         {
             get;
             set;
         }
+
+        [ModelDefault("EditMask","f2")]
+        [ModelDefault("DisplayFormat", "f2")]
+        public decimal TotalLineAmount
+        {
+            get
+            {
+                return (decimal)(Quantity * UnitPrice);
+            }
+        }
+
         public bool Returned
         {
             get;
             set;
         }
 
-        public override void AfterConstruction()
+        protected override void OnChanged(string propertyName, object oldValue, object newValue)
         {
-            base.AfterConstruction();
-            // Place your initialization code here (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112834.aspx).
-        }
-        //private string _PersistentProperty;
-        //[XafDisplayName("My display name"), ToolTip("My hint message")]
-        //[ModelDefault("EditMask", "(000)-00"), Index(0), VisibleInListView(false)]
-        //[Persistent("DatabaseColumnName"), RuleRequiredField(DefaultContexts.Save)]
-        //public string PersistentProperty {
-        //    get { return _PersistentProperty; }
-        //    set { SetPropertyValue("PersistentProperty", ref _PersistentProperty, value); }
-        //}
+            base.OnChanged(propertyName, oldValue, newValue);
 
-        //[Action(Caption = "My UI Action", ConfirmationMessage = "Are you sure?", ImageName = "Attention", AutoCommit = true)]
-        //public void ActionMethod() {
-        //    // Trigger a custom business logic for the current record in the UI (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112619.aspx).
-        //    this.PersistentProperty = "Paid";
-        //}
+            if(propertyName.Equals("Quantity") || propertyName.Equals("UnitPrice"))
+            {
+               
+            }
+
+        }
+
+        [Action(Caption = "Return Item")]
+        public void CancelPurchasedItem()
+        {
+            Item.AvailableQuantity -= Quantity;
+            Session.Save(Item);
+            Returned = true;
+            Session.Save(this);
+            Session.CommitTransaction();
+        }
+
+
     }
 }

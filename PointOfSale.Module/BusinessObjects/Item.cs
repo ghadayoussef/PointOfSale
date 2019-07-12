@@ -1,4 +1,5 @@
-﻿using DevExpress.Persistent.Base;
+﻿using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using System;
 using System.Collections.Generic;
@@ -56,6 +57,22 @@ namespace PointOfSale.Module.BusinessObjects
         }
 
         public int MinimumQuantity
+        {
+            get;
+            set;
+        }
+
+        [ModelDefault("EditMask","f2")]
+        [ModelDefault("DisplayFormat", "f2")]
+        public decimal DefaultBuyingPrice
+        {
+            get;
+            set;
+        }
+
+        [ModelDefault("EditMask", "f2")]
+        [ModelDefault("DisplayFormat", "f2")]
+        public decimal DefaultSellingPrice
         {
             get;
             set;

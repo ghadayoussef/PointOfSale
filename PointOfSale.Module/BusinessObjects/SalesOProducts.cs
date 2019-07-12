@@ -15,11 +15,7 @@ using DevExpress.Persistent.Validation;
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    //[ImageName("BO_Contact")]
-    //[DefaultProperty("DisplayMemberNameForLookupEditorsOfThisType")]
-    //[DefaultListViewOptions(MasterDetailMode.ListViewOnly, false, NewItemRowPosition.None)]
-    //[Persistent("DatabaseTableName")]
-    // Specify more UI options using a declarative approach (https://documentation.devexpress.com/#eXpressAppFramework/CustomDocument112701).
+   
     public class SalesOProducts : XPCustomObject
     { // Inherit from a different class to provide a custom primary key, concurrency and deletion behavior, etc. (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument113146.aspx).
         public SalesOProducts(Session session)
@@ -39,16 +35,21 @@ namespace PointOfSale.Module.BusinessObjects
                 SetPropertyValue("Item",ref _item, value);
             }
         }
-    
-        public int ProductID
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public int ItemID
         {
             get
             {
-                return Item.Number;
+                if(Item!= null)
+                    return Item.Number;
+                return 0;
             }
         }
 
         private SalesOrder _salesOrder;
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         [Association("SalesOrders-SalesOProducts")]
         public SalesOrder SalesOrder
         {
@@ -65,47 +66,62 @@ namespace PointOfSale.Module.BusinessObjects
         public int SalesOrderID
         {
             get
-            {
-                return SalesOrder.OrderID;
+            {    //if doesn't work
+               // if (SalesOrder ! = null)
+                    return SalesOrder.OrderID; 
+               // return 0;
             }
         }
-
+        private int _quantity;
+        //kanet bte3mel eh ??????????????????????????????????????????
+        [ImmediatePostData]
+        [RuleRequiredField]
         public int Quantity
         {
-            get;
-            set;
+            get
+            {
+                return _quantity;
+            }
+            set
+            {
+                SetPropertyValue("Quantity", ref _quantity, value);
+            }
         }
-
+        [ImmediatePostData]
         public float UnitPrice
         {
             get;
             set;
-        }
 
+        }
+        [ModelDefault("EditMask","f2")]
+        [ModelDefault("DisplayFormat","f2")]
+        public decimal TotalLineAmount
+        {
+            get
+            {
+                //eh el error
+                return (decimal)(Quantity * UnitPrice);
+
+            }
+           
+        }
         public bool Returned
         {
             get;
             set;
         }
 
-        public override void AfterConstruction()
+        [Action (Caption ="Cancel Sales Order")]
+        public void CancelSalingItem()
         {
-            base.AfterConstruction();
-            // Place your initialization code here (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112834.aspx).
+            Item.AvailableQuantity += Quantity;
+            Returned = true;
+            Session.Save(Item);
+            Session.Save(this);
+            Session.CommitTransaction();
         }
-        //private string _PersistentProperty;
-        //[XafDisplayName("My display name"), ToolTip("My hint message")]
-        //[ModelDefault("EditMask", "(000)-00"), Index(0), VisibleInListView(false)]
-        //[Persistent("DatabaseColumnName"), RuleRequiredField(DefaultContexts.Save)]
-        //public string PersistentProperty {
-        //    get { return _PersistentProperty; }
-        //    set { SetPropertyValue("PersistentProperty", ref _PersistentProperty, value); }
-        //}
-
-        //[Action(Caption = "My UI Action", ConfirmationMessage = "Are you sure?", ImageName = "Attention", AutoCommit = true)]
-        //public void ActionMethod() {
-        //    // Trigger a custom business logic for the current record in the UI (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112619.aspx).
-        //    this.PersistentProperty = "Paid";
-        //}
     }
+
+   
 }

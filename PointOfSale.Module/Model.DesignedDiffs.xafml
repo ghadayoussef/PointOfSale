@@ -25,7 +25,58 @@
     <SchemaModule Name="SystemModule" Version="19.1.4.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
-    <ListView Id="PurchaseOrder_PoProducts_ListView">
+    <DetailView Id="PoProduct_DetailView">
+      <Items>
+        <PropertyEditor Id="TotalLineAmount" DisplayFormat="f2" EditMask="f2" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="PoProduct" RelativeSize="100">
+              <LayoutGroup Id="PoProduct_col1" RelativeSize="36.505460218408736">
+                <LayoutItem Id="Item" RelativeSize="11.469534050179211" />
+                <LayoutItem Id="PurchaseOrderID" RelativeSize="8.6021505376344081" />
+                <LayoutItem Id="Quantity" RelativeSize="8.6021505376344081" />
+                <LayoutItem Id="UnitPrice" ViewItem="UnitPrice" Index="3" RelativeSize="8.6021505376344081" IsNewNode="True" />
+                <LayoutItem Id="TotalLineAmount" ViewItem="TotalLineAmount" Index="4" RelativeSize="62.724014336917563" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="PoProduct_col2" RelativeSize="63.494539781591264" Caption="PoProduct_col2">
+                <LayoutItem Id="Returned" Index="0" RelativeSize="100" />
+                <LayoutItem Id="TotalLineAmount" Index="0" RelativeSize="11.469534050179211" Removed="True" />
+                <LayoutItem Id="UnitPrice" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="PurchaseOrder_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="35.627530364372468">
+            <LayoutGroup Id="PurchaseOrder" RelativeSize="100">
+              <LayoutGroup Id="PurchaseOrder_col1" RelativeSize="50">
+                <LayoutItem Id="Number" RelativeSize="23.529411764705884" />
+                <LayoutItem Id="Date" RelativeSize="17.647058823529413" />
+                <LayoutItem Id="Supplier" ViewItem="Supplier" Index="2" RelativeSize="17.647058823529413" IsNewNode="True" />
+                <LayoutItem Id="ETD" Index="3" RelativeSize="17.647058823529413" />
+                <LayoutItem Id="DeliveryDate" Index="4" RelativeSize="23.529411764705884" />
+              </LayoutGroup>
+              <LayoutGroup Id="PurchaseOrder_col2" RelativeSize="50">
+                <LayoutItem Id="OrderTotal" Index="0" RelativeSize="23.529411764705884" />
+                <LayoutItem Id="Status" Index="1" RelativeSize="17.647058823529413" />
+                <LayoutItem Id="PaymentStatus" Index="2" RelativeSize="58.8235294117647" />
+                <LayoutItem Id="Supplier" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PoProducts_Group" Direction="Vertical" RelativeSize="64.372469635627525">
+            <LayoutItem Id="PoProducts" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="PurchaseOrder_PoProducts_ListView" AllowEdit="True" NewItemRowPosition="Bottom">
       <Columns>
         <ColumnInfo Id="ItemID" Index="-1" />
         <ColumnInfo Id="PurchaseOrderID" Index="-1" />

@@ -25,6 +25,11 @@ namespace PointOfSale.Module.BusinessObjects
         public SalesOrder(Session session)
             : base(session)
         {
+            if (session.IsNewObject(this))
+            {
+                Date = DateTime.Now;
+                Status = OrderStatus.InProgress;
+            }
         }
         [Key(AutoGenerate = true)]
      
@@ -54,12 +59,28 @@ namespace PointOfSale.Module.BusinessObjects
                 return Customer.CustomerId;
             }
         }
+        private DateTime _date;
+        [RuleRequiredField]
+        [ModelDefault("EditMask","dd-MM-yyyy")]
+        [ModelDefault("DisplayFormat","dd-MM-yyyy")]
         public DateTime Date
+        {
+            get
+            {
+                return _date;
+            }
+            set
+            {
+                SetPropertyValue("Date", ref _date, value);
+            }
+        }
+        public String PaymentType
         {
             get;
             set;
         }
-        public String PaymentType
+        [XafDisplayName("Status of the order")]
+        public OrderStatus Status
         {
             get;
             set;
@@ -70,25 +91,31 @@ namespace PointOfSale.Module.BusinessObjects
         {
             get { return GetCollection<SalesOProducts>("SalesOProducts"); }
         }
-
-        public override void AfterConstruction()
+        [ModelDefault("EditMask","f2")]
+        [ModelDefault("DisplayFormat","f2")]
+        private decimal _orderTotal;
+        public decimal OrderTotal
         {
-            base.AfterConstruction();
-            // Place your initialization code here (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112834.aspx).
-        }
-        //private string _PersistentProperty;
-        //[XafDisplayName("My display name"), ToolTip("My hint message")]
-        //[ModelDefault("EditMask", "(000)-00"), Index(0), VisibleInListView(false)]
-        //[Persistent("DatabaseColumnName"), RuleRequiredField(DefaultContexts.Save)]
-        //public string PersistentProperty {
-        //    get { return _PersistentProperty; }
-        //    set { SetPropertyValue("PersistentProperty", ref _PersistentProperty, value); }
-        //}
+            get
+            {
+                _orderTotal = SalesOProducts.Sum(x => x.TotalLineAmount);
+                return _orderTotal;
+            }
 
-        //[Action(Caption = "My UI Action", ConfirmationMessage = "Are you sure?", ImageName = "Attention", AutoCommit = true)]
-        //public void ActionMethod() {
-        //    // Trigger a custom business logic for the current record in the UI (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument112619.aspx).
-        //    this.PersistentProperty = "Paid";
-        //}
+        }
+        private decimal _paidAmount;
+        public decimal PaidAmount
+        {
+            get
+            {
+                return _paidAmount;
+            }
+            set
+            {
+                SetPropertyValue("PaidAmount", ref _paidAmount, value);
+            }
+        }
     }
+       
+
 }
