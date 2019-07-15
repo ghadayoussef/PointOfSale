@@ -15,13 +15,22 @@ using DevExpress.Persistent.Validation;
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
-   
+
     public class SalesOProducts : XPCustomObject
     { // Inherit from a different class to provide a custom primary key, concurrency and deletion behavior, etc. (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument113146.aspx).
         public SalesOProducts(Session session)
             : base(session)
         {
         }
+
+        [Key(AutoGenerate = true)]
+        public int Number
+        {
+            get;
+            set;
+        }
+
+
         private Item _item;
         [Association("item-SalesOProducts")]
         public Item Item
@@ -65,15 +74,24 @@ namespace PointOfSale.Module.BusinessObjects
       
         public int SalesOrderID
         {
-            get
-            {    //if doesn't work
+           // get
+            //{    //if doesn't work
                // if (SalesOrder ! = null)
-                    return SalesOrder.OrderID; 
+                //    return SalesOrder.OrderID; 
                // return 0;
+            //}
+
+            get
+            {
+                if (SalesOrder != null)
+                    return SalesOrder.OrderID;
+                else
+                    return 0;
             }
+
+
         }
         private int _quantity;
-        //kanet bte3mel eh ??????????????????????????????????????????
         [ImmediatePostData]
         [RuleRequiredField]
         public int Quantity
@@ -100,7 +118,7 @@ namespace PointOfSale.Module.BusinessObjects
         {
             get
             {
-                //eh el error
+                
                 return (decimal)(Quantity * UnitPrice);
 
             }
@@ -111,6 +129,18 @@ namespace PointOfSale.Module.BusinessObjects
             get;
             set;
         }
+        /// msh fakra da kan by3mel eh bzabt
+        protected override void OnChanged(string propertyName, object oldValue, object newValue)
+        {
+            base.OnChanged(propertyName, oldValue, newValue);
+
+            if (propertyName.Equals("Quantity") || propertyName.Equals("UnitPrice"))
+            {
+
+            }
+
+        }
+
 
         [Action (Caption ="Cancel Sales Order")]
         public void CancelSalingItem()

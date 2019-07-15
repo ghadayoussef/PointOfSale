@@ -15,13 +15,9 @@ using DevExpress.Persistent.Validation;
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    //[ImageName("BO_Contact")]
-    //[DefaultProperty("DisplayMemberNameForLookupEditorsOfThisType")]
-    //[DefaultListViewOptions(MasterDetailMode.ListViewOnly, false, NewItemRowPosition.None)]
-    //[Persistent("DatabaseTableName")]
-    // Specify more UI options using a declarative approach (https://documentation.devexpress.com/#eXpressAppFramework/CustomDocument112701).
+    
     public class SalesOrder : XPCustomObject
-    { // Inherit from a different class to provide a custom primary key, concurrency and deletion behavior, etc. (https://documentation.devexpress.com/eXpressAppFramework/CustomDocument113146.aspx).
+    { 
         public SalesOrder(Session session)
             : base(session)
         {
@@ -115,7 +111,56 @@ namespace PointOfSale.Module.BusinessObjects
                 SetPropertyValue("PaidAmount", ref _paidAmount, value);
             }
         }
+        [ModelDefault("EditMask", "f2")]
+        [ModelDefault("DisplayFormat", "f2")]
+        public decimal DueAmount
+        {
+            get
+            {
+                return OrderTotal - PaidAmount;
+            }
+        }
+
+
+        [XafDisplayName("Status Of Payment")]
+        public PaymentStatus PaymentStatus
+        {
+            get
+            {
+                if (DueAmount == 0)
+                    return PaymentStatus.Paid;
+                else if (DueAmount < PaidAmount)
+                    return PaymentStatus.PartiallyPaid;
+                else 
+                    return PaymentStatus.NotPaid;
+            }
+
+        }
+
+        [Action(AutoCommit = true, Caption = "Finalize Order",
+           ImageName = "BO_Product",
+           ConfirmationMessage = "ASDFASDFSADFA",
+           ToolTip = "This action increases item quantities in your inventory")]
+        public void MarkOrderAsDelivered()
+        {
+            //Validation Code
+            if (SalesOProducts.Any(x => x.Quantity <= 0 || x.Item == null || x.UnitPrice <= 0))
+                throw new UserFriendlyException("Invalid Entries");
+            else
+            {
+                Status = OrderStatus.GoodsDelivered;
+                Logic.BusinessLogic.SalesLogic.UpdateItemQuantityOnSale(this);
+                Session.Save(this);
+                Session.CommitTransaction();
+
+            }
+
+
+
+        }
+
     }
+    
        
 
 }

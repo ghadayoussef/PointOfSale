@@ -64,7 +64,19 @@ namespace PointOfSale.Module.Logic
             {
                 if(so.SalesOProducts.Count > 0)
                 {
-                    if (so)
+                    
+                        if (so.Status == OrderStatus.GoodsDelivered)
+                        {
+                            for (int i = 0; i < so.SalesOProducts.Count; i++)
+                            {
+                                Item x = so.SalesOProducts[i].Item;
+                                x.AvailableQuantity -= so.SalesOProducts[i].Quantity;
+                                x.Save();
+                            }
+                        }
+
+
+                    
                 }
 
             }
