@@ -11,10 +11,22 @@ using System.Collections.Generic;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.ConditionalAppearance;
 
 namespace PointOfSale.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [Appearance("DueAmountRule",
+        TargetItems = "DueAmount",
+        Criteria = "DueAmount > 0",
+        FontStyle = System.Drawing.FontStyle.Bold
+        ,FontColor = "Red")]
+
+    [Appearance("FinalizedOrder",
+        TargetItems = "*",
+        Criteria = "Status == 1",
+        Enabled = false,
+        FontStyle = System.Drawing.FontStyle.Bold)]
     
     public class SalesOrder : XPCustomObject
     { 
@@ -24,7 +36,7 @@ namespace PointOfSale.Module.BusinessObjects
             if (session.IsNewObject(this))
             {
                 Date = DateTime.Now;
-                Status = OrderStatus.InProgress;
+                Status = SalesOrderStatus.InProgress;
             }
         }
         [Key(AutoGenerate = true)]
@@ -52,7 +64,10 @@ namespace PointOfSale.Module.BusinessObjects
         {
             get
             {
-                return Customer.CustomerId;
+                if(Customer != null)
+                    return Customer.CustomerId;
+                else
+                    return 0;
             }
         }
         private DateTime _date;
@@ -70,13 +85,15 @@ namespace PointOfSale.Module.BusinessObjects
                 SetPropertyValue("Date", ref _date, value);
             }
         }
-        public String PaymentType
+        public PaymentType PaymentType
         {
             get;
             set;
         }
-        [XafDisplayName("Status of the order")]
-        public OrderStatus Status
+
+        [ImmediatePostData]
+        [ModelDefault("AllowEdit","false")]
+        public SalesOrderStatus Status
         {
             get;
             set;
@@ -100,6 +117,8 @@ namespace PointOfSale.Module.BusinessObjects
 
         }
         private decimal _paidAmount;
+        [ModelDefault("EditMask", "f2")]
+        [ModelDefault("DisplayFormat", "f2")]
         public decimal PaidAmount
         {
             get
@@ -137,30 +156,43 @@ namespace PointOfSale.Module.BusinessObjects
 
         }
 
-        [Action(AutoCommit = true, Caption = "Finalize Order",
+        [Action(AutoCommit = true, 
+            Caption = "Finalize Order",
+            TargetObjectsCriteria = "Status = 0 && SalesOProducts.Count > 0",
            ImageName = "BO_Product",
-           ConfirmationMessage = "ASDFASDFSADFA",
-           ToolTip = "This action increases item quantities in your inventory")]
-        public void MarkOrderAsDelivered()
+           ConfirmationMessage = "Are you sure that you wish to perform this operation?",
+           ToolTip = "This action decreases item quantities in your inventory")]
+        public void FinalizeSalesOrder()
         {
             //Validation Code
             if (SalesOProducts.Any(x => x.Quantity <= 0 || x.Item == null || x.UnitPrice <= 0))
                 throw new UserFriendlyException("Invalid Entries");
             else
             {
-                Status = OrderStatus.GoodsDelivered;
                 Logic.BusinessLogic.SalesLogic.UpdateItemQuantityOnSale(this);
                 Session.Save(this);
                 Session.CommitTransaction();
 
             }
-
-
-
+            
         }
 
     }
+
+    public enum PaymentType
+    {
+        Cash = 0,
+        Visa = 1,
+    }
     
+    public enum SalesOrderStatus
+    {
+        InProgress = 0,
+        Finalized = 1,
+        Returned = 2,
+        Cancelled = 3,
+
+    }
        
 
 }

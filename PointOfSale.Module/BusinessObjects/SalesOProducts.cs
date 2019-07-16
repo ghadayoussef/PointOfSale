@@ -32,6 +32,7 @@ namespace PointOfSale.Module.BusinessObjects
 
 
         private Item _item;
+        [ImmediatePostData]
         [Association("item-SalesOProducts")]
         public Item Item
         {
@@ -42,6 +43,10 @@ namespace PointOfSale.Module.BusinessObjects
             set
             {
                 SetPropertyValue("Item",ref _item, value);
+                if (_item != null)
+                    UnitPrice = (float)_item.DefaultSellingPrice;
+
+
             }
         }
         [VisibleInDetailView(false)]
@@ -105,6 +110,9 @@ namespace PointOfSale.Module.BusinessObjects
                 SetPropertyValue("Quantity", ref _quantity, value);
             }
         }
+
+        //This should be get + set (Because if it has only a getter, all data in the database will be modified)
+        // Price changes with time
         [ImmediatePostData]
         public float UnitPrice
         {

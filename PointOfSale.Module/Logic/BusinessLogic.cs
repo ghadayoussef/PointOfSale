@@ -1,4 +1,5 @@
-﻿using DevExpress.Xpo;
+﻿using DevExpress.ExpressApp;
+using DevExpress.Xpo;
 using PointOfSale.Module.BusinessObjects;
 using System;
 using System.Collections.Generic;
@@ -62,25 +63,79 @@ namespace PointOfSale.Module.Logic
         {
             public static void UpdateItemQuantityOnSale(SalesOrder so) 
             {
-                if(so.SalesOProducts.Count > 0)
+
+                //Validation of user entries
+                if (so.Customer == null)
+                    throw new UserFriendlyException("Choose a Customer to procceed");
+
+                if(so.Status != SalesOrderStatus.InProgress)
+                    throw new UserFriendlyException("You cannot Finalize an order that is not in progress");
+
+                if (so.SalesOProducts.Count == 0)
+                    throw new UserFriendlyException("You invoice must include items");
+
+                if(so.SalesOProducts.Any(x=>x.Item == null || 
+                        x.Quantity <= 0 || 
+                        x.UnitPrice <= 0))
                 {
-                    
-                        if (so.Status == OrderStatus.GoodsDelivered)
-                        {
-                            for (int i = 0; i < so.SalesOProducts.Count; i++)
-                            {
-                                Item x = so.SalesOProducts[i].Item;
-                                x.AvailableQuantity -= so.SalesOProducts[i].Quantity;
-                                x.Save();
-                            }
-                        }
-
-
-                    
+                    throw new UserFriendlyException("Kindly review your items");
                 }
+
+                //Validate Stock quantities
+                if(so.SalesOProducts.Any(x=>x.Quantity > x.Item.AvailableQuantity))
+                {
+
+                    SalesOProducts sop = so.SalesOProducts.FirstOrDefault(x => x.Quantity > x.Item.AvailableQuantity);
+                    throw new UserFriendlyException("Not enough quantity in stock of item:"+sop.Item.ItemName);
+
+                }
+
+                //decrease qty from stock
+                for (int i = 0; i < so.SalesOProducts.Count; i++)
+                {
+                    Item x = so.SalesOProducts[i].Item;
+                    x.AvailableQuantity -= so.SalesOProducts[i].Quantity;
+                    x.Save();
+                }
+
+                //Update Sales Order status
+                so.Status = SalesOrderStatus.Finalized;
+                so.Save();
+
+                //ZEY ELLY FO2HA
+                //for (int i =0; i < so.SalesOProducts.Count;i++)
+                //{
+                //    SalesOProducts obj = so.SalesOProducts[i];
+                //    if (obj.Item == null)
+                //        throw new UserFriendlyException("Item not found");
+                //    if (obj.Quantity <= 0)
+                //        throw new UserFriendlyException("Item:" + obj.Item.ItemName + " quantity is invalid");
+                //    if (obj.UnitPrice <= 0)
+                //        throw new UserFriendlyException("Item:" + obj.Item.ItemName + " UNIT price is invalid");
+
+                //}
+
+
+
+
+
+
+
+
+
 
             }
 
+        }
+
+        public static class Statistics
+        {
+            public static decimal GetTotalItemSales(Item item)
+            {
+
+                decimal total = item.SalesOProducts.Sum(x => (decimal)(x.Quantity * x.UnitPrice));
+                return total;
+            }
         }
 
 
